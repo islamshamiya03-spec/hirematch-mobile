@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "HireMatch",
+    "slug": "hirematch-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": { "supportsTablet": true },
+    "android": { "adaptiveIcon": { "backgroundColor": "#FF4F70" } }
+  }
+}
