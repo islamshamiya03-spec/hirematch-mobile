@@ -1,5 +1,12 @@
 backend/.venv/
+
 .env
+
 backend/.env
+
 node_modules/
+
 .expo/
+
+backend/__pycache__/
+*.pyc
