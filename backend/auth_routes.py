@@ -1,3 +1,4 @@
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -174,4 +175,43 @@ def get_jobseeker_profile(
             "experience": profile.experience,
             "resume": profile.resume,
         }
+    }
+
+
+@router.put("/jobseeker/profile")
+def update_jobseeker_profile(
+    profile: JobSeekerProfileCreate,
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user),
+):
+    existing_profile = (
+        db.query(JobSeekerProfile)
+        .filter(JobSeekerProfile.user_id == current_user_id)
+        .first()
+    )
+
+    if not existing_profile:
+        raise HTTPException(
+            status_code=404,
+            detail="Job Seeker profile not found",
+        )
+
+    existing_profile.skills = profile.skills
+    existing_profile.education = profile.education
+    existing_profile.experience = profile.experience
+    existing_profile.resume = profile.resume
+
+    db.commit()
+    db.refresh(existing_profile)
+
+    return {
+        "message": "Job Seeker profile updated successfully",
+        "profile": {
+            "id": existing_profile.id,
+            "user_id": existing_profile.user_id,
+            "skills": existing_profile.skills,
+            "education": existing_profile.education,
+            "experience": existing_profile.experience,
+            "resume": existing_profile.resume,
+        },
     }
