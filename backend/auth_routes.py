@@ -1,7 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from auth import verify_password, create_access_token, hash_password, get_current_user
+from auth import (
+    verify_password,
+    create_access_token,
+    hash_password,
+    get_current_user,
+)
 from database import SessionLocal
 from models import User, JobSeekerProfile
 from schemas import UserCreate, UserLogin, JobSeekerProfileCreate
@@ -140,4 +145,33 @@ def create_jobseeker_profile(
             "experience": new_profile.experience,
             "resume": new_profile.resume,
         },
+    }
+
+
+@router.get("/jobseeker/profile")
+def get_jobseeker_profile(
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user),
+):
+    profile = (
+        db.query(JobSeekerProfile)
+        .filter(JobSeekerProfile.user_id == current_user_id)
+        .first()
+    )
+
+    if not profile:
+        raise HTTPException(
+            status_code=404,
+            detail="Job Seeker profile not found",
+        )
+
+    return {
+        "profile": {
+            "id": profile.id,
+            "user_id": profile.user_id,
+            "skills": profile.skills,
+            "education": profile.education,
+            "experience": profile.experience,
+            "resume": profile.resume,
+        }
     }
