@@ -11,6 +11,7 @@ class User(Base):
     password = Column(String, nullable=False)
     role = Column(String, nullable=False)
 
+
 class JobSeekerProfile(Base):
     __tablename__ = "job_seeker_profiles"
 
@@ -20,4 +21,3 @@ class JobSeekerProfile(Base):
     education = Column(String, nullable=True)
     experience = Column(String, nullable=True)
     resume = Column(String, nullable=True)
-    
