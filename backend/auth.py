@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timedelta, timezone
 
 import jwt
 from dotenv import load_dotenv
@@ -24,7 +25,13 @@ def verify_password(password: str, hashed_password: str) -> bool:
 
 
 def create_access_token(user_id: int) -> str:
-    payload = {"user_id": user_id}
+    expire = datetime.now(timezone.utc) + timedelta(hours=24)
+
+    payload = {
+        "user_id": user_id,
+        "exp": expire,
+    }
+
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
@@ -48,8 +55,14 @@ def get_current_user(
 
         return user_id
 
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=401,
+            detail="Token has expired",
+        )
+
     except jwt.InvalidTokenError:
         raise HTTPException(
             status_code=401,
-            detail="Invalid or expired token",
+            detail="Invalid token",
         )
