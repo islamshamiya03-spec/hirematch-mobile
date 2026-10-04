@@ -119,6 +119,36 @@ def get_my_jobs(
     }
 
 
+@router.get("/active")
+def get_active_jobs(
+    db: Session = Depends(get_db),
+    current_user_id: int = Depends(get_current_user),
+):
+    user = db.query(User).filter(
+        User.id == current_user_id
+    ).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=404,
+            detail="User not found",
+        )
+
+    if user.role != "JOB_SEEKER":
+        raise HTTPException(
+            status_code=403,
+            detail="Only Job Seekers can view active jobs",
+        )
+
+    jobs = db.query(Job).filter(
+        Job.active == True
+    ).all()
+
+    return {
+        "jobs": jobs
+    }
+
+
 @router.put("/{job_id}")
 def update_job(
     job_id: int,
