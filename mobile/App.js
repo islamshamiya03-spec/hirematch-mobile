@@ -24,7 +24,7 @@ import {
 } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
-const API_BASE_URL = 'http://10.83.191.148:8000';
+const API_BASE_URL = 'https://hirematch-backend-f6xb.onrender.com';
 
 const BLUE = '#FF4F70';
 
@@ -1529,15 +1529,43 @@ function AppScreen() {
     ]
   );
 
-  const apply = title => {
-    setNotice(
-      `Application sent for ${title}.`
-    );
+  const apply = async job => {
+    if (!accessToken) {
+      setNotice('Please log in first.');
+      return;
+    }
 
-    setTimeout(
-      () => setNotice(''),
-      2400
-    );
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/applications/${job.id}`,
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setNotice(
+          data.detail || 'Failed to apply for this job.'
+        );
+        return;
+      }
+
+      setNotice(`Application sent for ${job.title}.`);
+
+      setTimeout(
+        () => setNotice(''),
+        2400
+      );
+    } catch (error) {
+      console.error('Application error:', error);
+      setNotice('Cannot connect to the backend.');
+    }
   };
 
   /*
@@ -2855,11 +2883,7 @@ function AppScreen() {
                 matched={
                   job.score > 0
                 }
-                onApply={() =>
-                  apply(
-                    job.title
-                  )
-                }
+                onApply={() => apply(job)}
               />
             )
           )}
@@ -2957,11 +2981,7 @@ function AppScreen() {
                 page ===
                 'Matched'
               }
-              onApply={() =>
-                apply(
-                  job.title
-                )
-              }
+              onApply={() => apply(job)}
             />
           ))}
 
